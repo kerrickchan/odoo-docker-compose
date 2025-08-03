@@ -46,7 +46,6 @@ services:
       - odoo_web_data:/var/lib/odoo:rw
       - ./config:/etc/odoo:rw
       - ./addons:/mnt/extra-addons:rw
-    restart: unless-stopped
     networks:
       - odoo_network
     command: odoo -d odoo -i all --stop-after-init
