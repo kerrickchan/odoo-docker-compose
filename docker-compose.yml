@@ -2,12 +2,12 @@ name: 'odoo'
 
 services:
   db:
-    image: postgres:17
+    image: postgres:18.2
     environment:
       POSTGRES_USER: odoo
       POSTGRES_PASSWORD: odoo
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql
       - ./db/init:/docker-entrypoint-initdb.d
     restart: unless-stopped
     ports:
@@ -19,7 +19,7 @@ services:
       retries: 3
 
   odoo:
-    image: odoo:18
+    image: odoo:19 
     depends_on:
       db:
         condition: service_healthy
@@ -27,17 +27,22 @@ services:
       - "8069:8069"
     volumes:
       - ./config:/etc/odoo:rw
+      - ./addons:/mnt/addons:rw
+      # - ../enterprise-19.0:/mnt/enterprise:ro # Uncomment this line if you have the Odoo Enterprise source code and want to use it
     restart: unless-stopped
-    command: odoo
+    command: odoo --addons-path=/mnt/addons,/mnt/enterprise -u=all
 
   odoo-init:
-    image: odoo:18
+    image: odoo:19
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - ./config:/etc/odoo:rw
-    command: odoo -d odoo -i all -u all --stop-after-init
+      - ./addons:/mnt/addons:rw
+      # - ../enterprise-19.0:/mnt/enterprise:ro # Uncomment this line if you have the Odoo Enterprise source code and want to use it
+    restart: no
+    command: odoo -d odoo --addons-path=/mnt/addons,/mnt/enterprise -i all --stop-after-init
 
 volumes:
   db_data:
